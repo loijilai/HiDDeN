@@ -82,8 +82,9 @@ def main():
         train_options = TrainingOptions(
             batch_size=args.batch_size,
             number_of_epochs=args.epochs,
-            train_folder=os.path.join(args.data_dir, 'train'),
-            validation_folder=os.path.join(args.data_dir, 'val'),
+            # 自己改資料集路徑
+            train_folder=args.data_dir,
+            validation_folder="/home/lai/Research/coco/small_images/val2017",
             runs_folder=os.path.join('.', 'runs'),
             start_epoch=start_epoch,
             experiment_name=args.name)
@@ -132,7 +133,7 @@ def main():
         logging.info(f'Loading checkpoint from file {loaded_checkpoint_file_name}')
         utils.model_from_checkpoint(model, checkpoint)
 
-    logging.info('HiDDeN model: {}\n'.format(model.to_stirng()))
+    # logging.info('HiDDeN model: {}\n'.format(model.to_stirng()))
     logging.info('Model Configuration:\n')
     logging.info(pprint.pformat(vars(hidden_config)))
     logging.info('\nNoise configuration:\n')
