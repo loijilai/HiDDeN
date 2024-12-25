@@ -31,16 +31,16 @@ def main():
     parser.add_argument('--options-file', '-o', default='options-and-config.pickle', type=str,
                         help='The file where the simulation options are stored.')
     parser.add_argument('--checkpoint-file', '-c', required=True, type=str, help='Model checkpoint file')
-    parser.add_argument('--batch-size', '-b', default=12, type=int, help='The batch size.')
     parser.add_argument('--source-image', '-s', required=True, type=str,
                         help='The image to watermark')
+    parser.add_argument('--output-dir', '-out', default='/home/lai/Research/Graduate/HiDDeN/output', type=str, help='The directory where the output will be stored.')
     # parser.add_argument('--times', '-t', default=10, type=int,
     #                     help='Number iterations (insert watermark->extract).')
 
     args = parser.parse_args()
 
     train_options, hidden_config, noise_config = utils.load_options(args.options_file)
-    noiser = Noiser(noise_config)
+    noiser = Noiser(noise_config, device=device)
 
     checkpoint = torch.load(args.checkpoint_file)
     hidden_net = Hidden(hidden_config, device, noiser, None)
@@ -48,8 +48,8 @@ def main():
 
 
     image_pil = Image.open(args.source_image)
-    image = randomCrop(np.array(image_pil), hidden_config.H, hidden_config.W)
-    image_tensor = TF.to_tensor(image).to(device)
+    # image = randomCrop(np.array(image_pil), hidden_config.H, hidden_config.W)
+    image_tensor = TF.to_tensor(np.array(image_pil)).to(device)
     image_tensor = image_tensor * 2 - 1  # transform from [0, 1] to [-1, 1]
     image_tensor.unsqueeze_(0)
 
@@ -62,7 +62,7 @@ def main():
     print('original: {}'.format(message_detached))
     print('decoded : {}'.format(decoded_rounded))
     print('error : {:.3f}'.format(np.mean(np.abs(decoded_rounded - message_detached))))
-    utils.save_images(image_tensor.cpu(), encoded_images.cpu(), 'test', '.', resize_to=(256, 256))
+    utils.save_images(image_tensor.cpu(), encoded_images.cpu(), 'test', args.output_dir, resize_to=(512, 512))
 
     # bitwise_avg_err = np.sum(np.abs(decoded_rounded - message.detach().cpu().numpy()))/(image_tensor.shape[0] * messages.shape[1])
 
